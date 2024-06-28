@@ -62,20 +62,27 @@ module Z.Data.Array.Base (
   , sizeOf
   ) where
 
-import           Control.Exception              (ArrayException (..), throw)
+import           Control.Exception          (ArrayException (..), throw)
 import           Control.Monad
 import           Control.Monad.Primitive
 import           Control.Monad.ST
-import           Data.Bits                      (unsafeShiftL)
-import           Data.Kind                      (Type)
+import           Data.Bits                  (unsafeShiftL)
+import           Data.Kind                  (Type)
 import           Data.Primitive.Array
 import           Data.Primitive.ByteArray
+#if !MIN_VERSION_primitive(0, 9, 0)
 import           Data.Primitive.PrimArray
-import           Data.Primitive.Ptr             (copyPtrToMutablePrimArray)
+#else
+import           Data.Primitive.PrimArray   hiding
+                                            (withMutablePrimArrayContents,
+                                             withPrimArrayContents)
+#endif
+import           Data.Primitive.Ptr         (copyPtrToMutablePrimArray)
 import           Data.Primitive.SmallArray
 import           Data.Primitive.Types
 import           GHC.Exts
-import           System.Random.Stateful  ( UniformRange(uniformRM), StatefulGen )
+import           System.Random.Stateful     (StatefulGen,
+                                             UniformRange (uniformRM))
 import           Z.Data.Array.Cast
 import           Z.Data.Array.UnliftedArray
 
@@ -589,6 +596,8 @@ instance PrimUnlifted a => Arr UnliftedArray a where
 
 --------------------------------------------------------------------------------
 
+-- FIXME: directly use Data.Primitive.PrimArray.withPrimArrayContents
+-- when primitive>=0.9.0 ?
 -- | Obtain the pointer to the content of an array, and the pointer should only be used during the IO action.
 --
 -- This operation is only safe on /pinned/ primitive arrays (Arrays allocated by 'newPinnedPrimArray' or
@@ -604,6 +613,8 @@ withPrimArrayContents (PrimArray ba#) f = do
     primitive_ (touch# ba#)
     return b
 
+-- FIXME: directly use Data.Primitive.PrimArray.withMutablePrimArrayContents
+-- when primitive>=0.9.0 ?
 -- | Obtain the pointer to the content of an mutable array, and the pointer should only be used during the IO action.
 --
 -- This operation is only safe on /pinned/ primitive arrays (Arrays allocated by 'newPinnedPrimArray' or

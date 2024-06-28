@@ -21,15 +21,19 @@ module Z.Foreign.CPtr (
   , FunPtr
   ) where
 
-import Control.Monad
-import Control.Monad.Primitive
-import Data.Primitive.PrimArray
-import qualified Z.Data.Text                as T
-import GHC.Ptr
-import GHC.Exts
-import GHC.IO
-import Z.Data.Array                         hiding (newPinnedPrimArray)
-import Z.Foreign
+import           Control.Monad
+import           Control.Monad.Primitive
+#if !MIN_VERSION_primitive(0, 9, 0)
+import           Data.Primitive.PrimArray
+#else
+import           Data.Primitive.PrimArray hiding (withMutablePrimArrayContents)
+#endif
+import           GHC.Exts
+import           GHC.IO
+import           GHC.Ptr
+import           Z.Data.Array             hiding (newPinnedPrimArray)
+import qualified Z.Data.Text              as T
+import           Z.Foreign
 
 -- | Lightweight foreign pointers.
 newtype CPtr a = CPtr (PrimArray (Ptr a))

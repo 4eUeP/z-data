@@ -109,9 +109,15 @@ import           Data.ByteString.Short.Internal (ShortByteString (..),
                                                  fromShort, toShort)
 import qualified Data.ByteString.Unsafe         as B
 import qualified Data.List                      as List
-import           Data.Primitive
 import           Data.Primitive.ByteArray
+import           Data.Primitive.Types
+#if !MIN_VERSION_primitive(0, 9, 0)
 import           Data.Primitive.PrimArray
+#else
+import           Data.Primitive.PrimArray       hiding
+                                                (withMutablePrimArrayContents,
+                                                 withPrimArrayContents)
+#endif
 import           Data.Primitive.Ptr
 import           Data.Word
 import           Foreign.C.Types
